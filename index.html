@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lendbench – campus equipment sharing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@600;700&family=Hanken+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF1F3;--surf:#fff;--ink:#12222C;--mute:#566771;--line:#D3DBE0;--acc:#0B6E8A;--accink:#fff;--ok:#2D7A57;--warn:#9A6208;--bad:#B2402E;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1A20;--surf:#16252D;--ink:#E6EEF1;--mute:#98A9B2;--line:#2A3B44;--acc:#4FB6D3;--accink:#04202A;--ok:#5CC08F;--warn:#E0A242;--bad:#F0826F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F1A20;--surf:#16252D;--ink:#E6EEF1;--mute:#98A9B2;--line:#2A3B44;--acc:#4FB6D3;--accink:#04202A;--ok:#5CC08F;--warn:#E0A242;--bad:#F0826F;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Schibsted Grotesk",system-ui,sans-serif}
+header{background:var(--surf);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0;letter-spacing:-.3px}h1 small{display:block;font-size:12px;font-weight:400;color:var(--mute);letter-spacing:0}
+.sp{flex:1}
+select,input,textarea,button{font:inherit;color:inherit}
+select,input,textarea{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 3px}
+button{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:500}
+button.p{background:var(--acc);color:var(--accink);border-color:var(--acc)}button.d{color:var(--bad)}
+button:hover{filter:brightness(.96)}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+nav{display:flex;gap:4px;padding:0 20px;background:var(--surf);border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:11px 12px;white-space:nowrap;color:var(--mute)}
+nav button[aria-current=page]{border-color:var(--acc);color:var(--ink);font-weight:700}
+main{max-width:980px;margin:0 auto;padding:20px}
+h2{font-size:17px;margin:22px 0 8px}
+.row{background:var(--surf);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:6px;padding:12px 14px;margin-bottom:10px;display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between}
+.row>div:first-child{flex:1 1 420px;min-width:0}
+.mut{color:var(--mute);font-size:13px}.why{font-size:13px;margin-top:4px;padding-left:9px;border-left:2px solid var(--line)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-start}
+.pill{font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;border:1px solid currentColor;margin-left:6px;white-space:nowrap}
+.s-approved,.s-returned{border-left-color:var(--ok)}.s-approved .pill,.s-returned .pill{color:var(--ok)}
+.s-pending,.s-waitlisted,.s-checked_in{border-left-color:var(--warn)}.s-pending .pill,.s-waitlisted .pill,.s-checked_in .pill{color:var(--warn)}
+.s-rejected,.s-cancelled{border-left-color:var(--bad)}.s-rejected .pill,.s-cancelled .pill{color:var(--bad)}
+.chip{display:inline-block;font-size:12px;padding:0 7px;border-radius:4px;border:1px solid var(--line);margin:2px 4px 2px 0}.chip.ok{color:var(--ok);border-color:var(--ok)}.chip.no{color:var(--bad);border-color:var(--bad)}
+.bar{display:flex;gap:10px;flex-wrap:wrap}.bar>*{flex:1 1 160px}
+details.g{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin-bottom:14px}details.g summary{cursor:pointer;font-weight:700}
+details.g ol{margin:8px 0 0;padding-left:20px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px;z-index:50}
+#modal.on{display:flex}.box{background:var(--surf);border-radius:10px;padding:18px;width:100%;max-width:560px}
+.box h3{margin:0 0 4px}.err{color:var(--bad);font-size:13px;margin-top:8px;min-height:18px}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.tl{font-size:13px;margin:0;padding:0;list-style:none}.tl li{padding:4px 0;border-bottom:1px dashed var(--line)}
+.empty{padding:26px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:6px}
+@media(prefers-reduced-motion:no-preference){.row{transition:border-color .2s}}
+:root{--bg:#E6ECE7;--surf:#FBFCFA;--ink:#16221C;--mute:#55655C;--line:#C6D2CA;--acc:#1F5F4A;--accink:#fff;--ok:#2A7048;--warn:#94640A;--bad:#A8392B;--tag:#E3B04B}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101A15;--surf:#17241D;--ink:#E4EEE7;--mute:#9BB0A3;--line:#2B3D33;--acc:#6CC39C;--accink:#08241A;--ok:#6CC39C;--warn:#E3B04B;--bad:#F08A78}}
+:root[data-theme="dark"]{--bg:#101A15;--surf:#17241D;--ink:#E4EEE7;--mute:#9BB0A3;--line:#2B3D33;--acc:#6CC39C;--accink:#08241A;--ok:#6CC39C;--warn:#E3B04B;--bad:#F08A78}
+body{font-family:"Hanken Grotesk",system-ui,sans-serif;display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{background:#1B382D;color:#E7F0EA;padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;gap:10px;align-items:flex-start}.ring{flex:none;width:20px;height:20px;border:5px solid var(--tag);border-radius:50%;margin-top:3px}
+h1,h2,h3{font-family:Bitter,Georgia,serif}h1{font-size:23px;line-height:1.1}h1 small{font-family:"Hanken Grotesk",system-ui,sans-serif;color:#A9C2B5;margin-top:5px;line-height:1.3}
+.side label{color:#A9C2B5;margin:0}.side select{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#fff;margin-top:5px}.side option{background:#fff;color:#16221C}
+.side nav{background:none;border:0;padding:0;flex-direction:column;overflow:visible;flex:1;gap:2px}
+.side nav button{text-align:left;border:0;border-left:4px solid transparent;border-radius:2px;color:#BCD1C5;padding:9px 12px}
+.side nav button[aria-current=page]{background:rgba(255,255,255,.12);border-left-color:var(--tag);color:#fff}
+.side>button{background:none;color:#BCD1C5;border-color:rgba(255,255,255,.3)}.fine{font-size:12px;color:#8FA99B;margin:0}
+main{margin:0;padding:30px 34px;max-width:880px}
+h2{font-size:20px;margin:26px 0 10px}
+.row{border-radius:3px;border-top:0;border-right:0;border-bottom:1px solid var(--line);border-left-width:6px;box-shadow:none;padding:14px 16px}
+.pill{font-family:Bitter,Georgia,serif;border-width:2px;border-radius:2px;transform:rotate(-2deg);display:inline-block;padding:0 8px}
+button{border-radius:3px}button.p{border-bottom:3px solid rgba(0,0,0,.28)}
+details.g{border-left:6px solid var(--tag);border-radius:3px}
+.box{border-radius:4px}.empty{border-radius:3px}
+@media(max-width:780px){body{display:block}.side{position:static;height:auto;padding:16px}.side nav{flex-direction:row;overflow-x:auto;flex:none}.side nav button{border-left:0;border-bottom:3px solid transparent;white-space:nowrap}.side nav button[aria-current=page]{border-bottom-color:var(--tag)}main{padding:18px 14px}}
+.who{font-size:14px;color:#BCD1C5}.who b{display:block;color:#fff;font-size:16px}
+</style></head><body>
+<aside class="side"><div class="brand"><span class="ring" aria-hidden="true"></span><h1>Lendbench<small>Borrow what the campus already owns</small></h1></div>
+<div id="who" class="who"></div>
+<nav id="nav" aria-label="Sections"></nav>
+<button onclick="signOut()">Sign out</button><p class="fine">Every name and record here is made up.</p></aside>
+<main id="app"></main>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL='https://kblimnxhazberuqzupes.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtibGltbnhoYXpiZXJ1cXp1cGVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyOTE3MzgsImV4cCI6MjEwODg2NzczOH0.kuh9Wd4U2Dxx6N-MvcAUdlsJzubAYpW5x9lZlimwxtg'; // paste from Supabase > Project Settings > API (anon key only)
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const CONDS=['Good','Minor wear','Damaged'],ACT=['pending','waitlisted','approved','checked_in'],USED=['approved','checked_in','returned'];
+const LBL={pending:'Awaiting review',waitlisted:'Waiting list',approved:'Approved',rejected:'Rejected',cancelled:'Cancelled',checked_in:'In use',returned:'Returned'};
+let S={users:[],resources:[],bookings:[],busy:[],incidents:[],certReqs:[],audit:[],notes:[]},me=null,view='discover',F={q:'',cat:'All',el:false},ASK=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=()=>new Date().toISOString(),tday=()=>iso().slice(0,10);
+const addD=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+const hh=h=>String(h).padStart(2,'0')+':00',fmtT=t=>new Date(t).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const fmt=b=>b.date+' '+hh(b.start)+'–'+hh(b.start+b.hrs);
+const U=id=>S.users.find(u=>u.id===id),R=id=>S.resources.find(r=>r.id===id),B=id=>S.bookings.find(b=>b.id===id),cu=()=>U(me);
+
+
+
+const reviewers=r=>S.users.filter(u=>u.id===r.owner||(u.role==='manager'&&r.managers.includes(u.id)));
+const canRev=(u,r)=>reviewers(r).some(x=>x.id===u.id);
+
+const overlap=(a,b)=>a.rid===b.rid&&a.date===b.date&&a.start<b.start+b.hrs&&b.start<a.start+a.hrs;
+const clashOf=b=>[...S.bookings,...S.busy].find(x=>x.id!==b.id&&['approved','checked_in'].includes(x.status)&&overlap(x,b));
+const used=(uid,rid,date)=>S.bookings.filter(b=>b.uid===uid&&b.rid===rid&&b.date.slice(0,7)===date.slice(0,7)&&USED.includes(b.status)).reduce((a,b)=>a+b.hrs,0);
+function score(uid,rid,date){const u=U(uid),h=used(uid,rid,date),late=S.bookings.filter(b=>b.uid===uid&&b.lateCancel).length;
+ const parts=[['Base score',50],['Hours already used this month on this resource ('+h+' h × −4)',-4*h]];
+ if(u.need)parts.push(['Declared academic or project need',10]);if(late)parts.push([late+' late cancellation(s) × −5',-5*late]);
+ return{total:Math.max(0,parts.reduce((a,p)=>a+p[1],0)),parts}}
+
+/* ---- data layer: Supabase rows -> the in-memory shape the screens use ---- */
+const T=async p=>{const r=await p;if(r.error)throw r.error;return r.data||[]};
+async function reload(){
+ const [pr,rs,mg,cr,bk,bz,ic,au,nt]=await Promise.all([T(sb.from('profiles').select('*')),T(sb.from('resources').select('*').order('name')),T(sb.from('resource_managers').select('*')),T(sb.from('credentials').select('*')),T(sb.from('bookings').select('*')),T(sb.from('busy_slots').select('*')),T(sb.from('incidents').select('*').order('created_at',{ascending:false})),T(sb.from('audit_log').select('*').order('id',{ascending:false}).limit(200)),T(sb.from('notifications').select('*').order('id',{ascending:false}))]);
+ S.users=pr.map(p=>({id:p.id,name:p.name,role:p.role,dept:p.dept||'',need:p.need,verified:p.verified,paused:p.paused,certs:cr.filter(c=>c.user_id===p.id&&c.status==='verified').map(c=>c.cert)}));
+ S.resources=rs.map(r=>({id:r.id,name:r.name,cat:r.category,loc:r.location,owner:r.owner_id,managers:mg.filter(m=>m.resource_id===r.id).map(m=>m.user_id),requires:r.requires||[],maxHrs:r.max_hrs,cap:r.monthly_cap,deposit:r.deposit,sup:r.supervised,rules:r.rules||'',active:r.active}));
+ S.bookings=bk.map(b=>({id:b.id,rid:b.resource_id,uid:b.user_id,date:b.date,start:b.start_hr,hrs:b.hrs,purpose:b.purpose||'',status:b.status,reason:b.reason||'',score:b.score||0,parts:b.parts||[],ci:b.ci,ret:b.ret,overdue:b.overdue,lateCancel:b.late_cancel,created:b.created_at}));
+ S.busy=bz.map(b=>({id:'busy',rid:b.resource_id,date:b.date,start:b.start_hr,hrs:b.hrs,status:'approved'}));
+ S.certReqs=cr.map(c=>({id:c.user_id+'|'+c.cert,uid:c.user_id,cert:c.cert,status:c.status}));
+ S.incidents=ic.map(i=>({id:i.id,bid:i.booking_id,rid:i.resource_id,uid:i.user_id,by:(i.description||'').startsWith('[Auto]')?'sys':i.reported_by,kind:i.kind,desc:(i.description||'').replace('[Auto] ',''),status:i.status,decision:i.decision,note:i.decision_note,t:i.created_at}));
+ S.audit=au.map(a=>({id:a.id,t:a.created_at,actor:a.actor,action:a.action,detail:a.detail,bid:a.booking_id,rid:a.resource_id}));
+ S.notes=nt.map(n=>({id:n.id,to:n.user_id,msg:n.msg,t:n.created_at,read:n.read}));
+ render()}
+const run=async fn=>{try{await fn()}catch(e){return e.code==='23P01'?'That time overlaps an already approved booking.':(e.message||String(e))}};
+const go=async p=>{try{await T(p);await reload()}catch(e){alert(e.message)}};
+/* modal helpers */
+function openModal(h){const m=$('#modal');m.innerHTML='<div class="box">'+h+'</div>';m.classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on');ASK=null}
+$('#modal').addEventListener('mousedown',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+function ask(title,fields,cb,okLabel){ASK={cb};
+ const f=fields.map(x=>x.t==='note'?'<p class="mut">'+x.l+'</p>':'<label for="f_'+x.k+'">'+x.l+'</label>'+(x.t==='select'?'<select id="f_'+x.k+'" name="'+x.k+'">'+x.o.map(o=>'<option>'+esc(o)+'</option>').join('')+'</select>':x.t==='textarea'?'<textarea id="f_'+x.k+'" name="'+x.k+'" rows="3"'+(x.req===0?'':' required')+'></textarea>':'<input id="f_'+x.k+'" name="'+x.k+'" type="'+(x.t||'text')+'" value="'+esc(x.v||'')+'"'+(x.min?' min="'+x.min+'"':'')+(x.req===0?'':' required')+'>')).join('');
+ openModal('<form onsubmit="askSubmit(event)"><h3>'+esc(title)+'</h3>'+f+'<div class="err" id="err" role="alert"></div><div class="acts" style="margin-top:8px"><button class="p">'+(okLabel||'Confirm')+'</button><button type="button" onclick="closeModal()">Cancel</button></div></form>')}
+async function askSubmit(e){e.preventDefault();const v=Object.fromEntries(new FormData(e.target));const err=await ASK.cb(v);if(err)$('#err').textContent=err;else{closeModal();await reload()}}
+function validate(r,v){const u=cu(),b={rid:r.id,date:v.date,start:+v.start,hrs:+v.hrs};
+ const miss=r.requires.filter(c=>!u.certs.includes(c));
+ if(miss.length)return'Not eligible yet. Missing verified credential: '+miss.join(', ')+'. Use "Request verification" on the listing.';
+ if(u.paused)return'Your booking privileges are paused after an incident review. An administrator can restore them.';
+ if(S.incidents.some(i=>i.status==='open'&&i.uid===u.id&&i.kind!=='Equipment fault'))return'You have an open incident that needs resolving before new bookings.';
+ if(v.date<tday())return'Choose today or a later date.';
+ if(b.start<9||b.start+b.hrs>18)return'This resource is available 09:00–18:00 only.';
+ if(b.hrs>r.maxHrs)return'Maximum '+r.maxHrs+' h per booking for this resource.';
+ if(S.bookings.filter(x=>x.uid===u.id&&ACT.includes(x.status)).length>=2)return'Fair-use limit: at most 2 active bookings at a time. Finish or cancel one first.';
+ const h=used(u.id,r.id,v.date);if(h+b.hrs>r.cap)return'Fair-use limit: monthly cap is '+r.cap+' h per person on this resource. You have used or reserved '+h+' h.';
+ const mine=S.bookings.find(x=>x.uid===u.id&&ACT.includes(x.status)&&overlap(x,b));if(mine)return'You already have a request overlapping this time.'}
+
+/* ---- actions: each one is a database write; triggers add audit, notifications, waiting-list promotion ---- */
+function submitReq(r,v){const err=validate(r,v);if(err)return err;const u=cu(),sc=score(u.id,r.id,v.date);
+ const clash=clashOf({rid:r.id,date:v.date,start:+v.start,hrs:+v.hrs});
+ const reason=clash?'This slot is already approved for another user. You are on the waiting list with fair-use priority score '+sc.total+'. If the slot frees up, the highest score moves to review first.':'Eligibility and fair-use checks passed. Awaiting owner review.';
+ return run(()=>T(sb.from('bookings').insert({resource_id:r.id,user_id:u.id,date:v.date,start_hr:+v.start,hrs:+v.hrs,purpose:v.purpose,status:clash?'waitlisted':'pending',reason,score:sc.total,parts:sc.parts})))}
+function openReq(rid){const r=R(rid),slots=S.bookings.filter(b=>b.rid===rid&&USED.includes(b.status)&&b.status!=='returned'&&b.date>=tday()).map(fmt);
+ ask('Request '+r.name,[{t:'note',l:'Open 09:00–18:00. Max '+r.maxHrs+' h per booking; monthly cap '+r.cap+' h per person. '+(slots.length?'Already booked: '+slots.map(esc).join('; ')+'.':'No approved bookings yet.')},
+ {k:'date',l:'Date',t:'date',v:addD(1),min:tday()},{k:'start',l:'Start time',t:'select',o:[9,10,11,12,13,14,15,16,17].map(hh)},{k:'hrs',l:'Duration (hours)',t:'select',o:Array.from({length:r.maxHrs},(_,i)=>String(i+1))},{k:'purpose',l:'Purpose of use',t:'textarea'}],
+ v=>{v.start=parseInt(v.start);return submitReq(r,v)},'Submit request')}
+
+const askCert=c=>go(sb.from('credentials').insert({user_id:me,cert:c}));
+const certAct=(id,ok)=>{const [uid,cert]=id.split('|');go(sb.from('credentials').update({status:ok?'verified':'declined'}).eq('user_id',uid).eq('cert',cert))};
+const upd=(b,p)=>T(sb.from('bookings').update(p).eq('id',b.id));
+async function approve(b,n){await upd(b,{status:'approved',reason:n||'Approved: eligibility verified, slot free, within fair-use limits.'});
+ for(const x of S.bookings.filter(x=>x.id!==b.id&&x.status==='pending'&&overlap(x,b)))await upd(x,{status:'waitlisted',reason:'Another request for this slot was approved (priority score '+b.score+' vs your '+x.score+'). You stay on the waiting list in case it frees up.'})}
+function cancel(b,reason){const late=b.status==='approved'&&b.uid===me&&new Date(b.date+'T'+hh(b.start)+':00')-new Date()<864e5;
+ return upd(b,{status:'cancelled',reason:reason||'Cancelled.',late_cancel:late||!!b.lateCancel})}
+const addInc=(b,kind,desc,auto)=>T(sb.from('incidents').insert({booking_id:b.id,resource_id:b.rid,user_id:b.uid,reported_by:me,kind,description:(auto?'[Auto] ':'')+desc}));
+function act(id,t){const b=B(id),r=R(b.rid),why=[{k:'n',l:'Reason (shown to the requester)',t:'textarea'}],cond=[{k:'c',l:'Condition',t:'select',o:CONDS},{k:'n',l:'Notes',t:'textarea',req:0}];
+ const A={
+ approve:()=>ask('Approve request',[{k:'n',l:'Note to requester (optional)',t:'textarea',req:0}],v=>run(()=>approve(b,v.n)),'Approve'),
+ reject:()=>ask('Reject request',why,v=>run(()=>upd(b,{status:'rejected',reason:v.n})),'Reject'),
+ wait:()=>ask('Move to waiting list',why,v=>run(()=>upd(b,{status:'waitlisted',reason:v.n})),'Move'),
+ cancel:()=>ask('Cancel booking',[{k:'n',l:'Reason',t:'textarea'}],v=>run(()=>cancel(b,v.n)),'Cancel booking'),
+ in:()=>ask('Check in: record starting condition',[{t:'note',l:'Record what the equipment looks like before you use it. This is the reference for the return.'},...cond],v=>run(()=>upd(b,{status:'checked_in',ci:{cond:v.c,notes:v.n,t:iso()}})),'Check in'),
+ out:()=>ask('Return: record final condition',cond,v=>run(async()=>{await upd(b,{status:'returned',ret:{cond:v.c,notes:v.n,t:iso()}});
+  const worse=CONDS.indexOf(v.c)>CONDS.indexOf(b.ci.cond);
+  if(worse||b.overdue)await addInc(b,worse?'Damage':'Delay',(worse?'Condition worsened from '+b.ci.cond+' to '+v.c+'. ':'')+(b.overdue?'Returned after the end time. ':'')+'Flagged by system rules; needs human review.',true)}),'Confirm return'),
+ late:()=>go(sb.from('bookings').update({overdue:true}).eq('id',id)),
+ inc:()=>ask(canRev(cu(),r)?'Report incident':'Report a problem',[{k:'k',l:'Type',t:'select',o:cu().id===b.uid?['Equipment fault','Conflict','Other']:['Damage','Delay','Conflict','Other']},{k:'d',l:'What happened?',t:'textarea'}],v=>run(()=>addInc(b,v.k,v.d)),'Submit report'),
+ det:()=>details(id)};A[t]()}
+function resolve(id){const i=S.incidents.find(x=>x.id===id);
+ ask('Resolve incident',[{t:'note',l:'You make the decision. The system only flags and summarises.'},{k:'x',l:'Decision',t:'select',o:['No action','Warning issued','Deposit retained or repair charged','Booking privileges paused (admin can review)']},{k:'n',l:'Explanation for the user',t:'textarea'}],
+ v=>run(async()=>{await T(sb.from('incidents').update({status:'resolved',decision:v.x,decision_note:v.n}).eq('id',id));if(v.x.startsWith('Booking'))await T(sb.rpc('pause_user',{uid:i.uid}))}),'Resolve')}
+const toggleRes=id=>go(sb.from('resources').update({active:!R(id).active}).eq('id',id));
+const admin=(id,t)=>go(sb.from('profiles').update(t==='v'?{verified:true}:{paused:false}).eq('id',id));
+async function setView(v){view=v;if(v==='inbox'){const ids=S.notes.filter(n=>n.to===me&&!n.read).map(n=>n.id);if(ids.length)await sb.from('notifications').update({read:true}).in('id',ids);S.notes.forEach(n=>n.read=true)}render()}
+function details(id){const b=B(id),r=R(b.rid),u=U(b.uid);
+ const tl=S.audit.filter(a=>a.bid===id).reverse().map(a=>'<li><b>'+esc(a.action)+'</b> by '+esc((U(a.actor)||{name:'System'}).name)+' <span class="mut">'+fmtT(a.t)+'</span><br>'+esc(a.detail)+'</li>').join('');
+ const inc=S.incidents.filter(i=>i.bid===id).map(i=>'<li><b>'+esc(i.kind)+'</b> ('+i.status+'): '+esc(i.desc)+(i.decision?'<br>Decision: '+esc(i.decision)+'. '+esc(i.note):'')+'</li>').join('');
+ openModal('<h3>'+esc(r.name)+'</h3><p class="mut">'+fmt(b)+' · '+esc(u.name)+' · <b>'+LBL[b.status]+'</b></p><p>'+esc(b.reason)+'</p>'+
+ '<h2>Priority score: '+b.score+'</h2><table>'+b.parts.map(p=>'<tr><td>'+esc(p[0])+'</td><td>'+(p[1]>0?'+':'')+p[1]+'</td></tr>').join('')+'</table>'+
+ '<h2>Condition record</h2><table><tr><th></th><th>Check-in</th><th>Return</th></tr><tr><td>Condition</td><td>'+(b.ci?b.ci.cond:'–')+'</td><td>'+(b.ret?b.ret.cond:'–')+'</td></tr><tr><td>Notes</td><td>'+esc(b.ci&&b.ci.notes||'–')+'</td><td>'+esc(b.ret&&b.ret.notes||'–')+'</td></tr></table>'+
+ (inc?'<h2>Incidents</h2><ul class="tl">'+inc+'</ul>':'')+'<h2>History</h2><ul class="tl">'+tl+'</ul><div class="acts" style="margin-top:12px"><button onclick="closeModal()">Close</button></div>')}
+const rows=l=>l.length?l.join(''):'<div class="empty">Nothing here yet.</div>';
+function bRow(b){const r=R(b.rid),u=cu(),rev=canRev(u,r),own=b.uid===u.id,a=[];
+ if(rev&&b.status==='pending')a.push('<button class="p" onclick="act(\''+b.id+'\',\'approve\')">Approve</button><button class="d" onclick="act(\''+b.id+'\',\'reject\')">Reject</button><button onclick="act(\''+b.id+'\',\'wait\')">Waiting list</button>');
+ if(rev&&b.status==='checked_in'&&!b.overdue)a.push('<button onclick="act(\''+b.id+'\',\'late\')" title="Demo clock">Simulate overdue</button>');
+ if(own&&b.status==='approved')a.push('<button class="p" onclick="act(\''+b.id+'\',\'in\')">Check in</button>');
+ if(own&&b.status==='checked_in')a.push('<button class="p" onclick="act(\''+b.id+'\',\'out\')">Return</button>');
+ if((own&&['pending','waitlisted','approved'].includes(b.status))||(rev&&b.status==='approved'))a.push('<button class="d" onclick="act(\''+b.id+'\',\'cancel\')">Cancel</button>');
+ if((own||rev)&&b.status!=='cancelled'&&b.status!=='rejected')a.push('<button onclick="act(\''+b.id+'\',\'inc\')">Report</button>');
+ a.push('<button onclick="act(\''+b.id+'\',\'det\')">Details</button>');
+ const comp=rev&&b.status==='pending'?S.bookings.filter(x=>x.id!==b.id&&x.status==='pending'&&overlap(x,b)):[];
+ return'<div class="row s-'+b.status+'"><div><b>'+esc(r.name)+'</b><span class="pill">'+LBL[b.status]+(b.overdue?' · overdue':'')+'</span><div class="mut">'+fmt(b)+(u.id!==b.uid?' · '+esc(U(b.uid).name):'')+' · '+esc(b.purpose)+' · priority '+b.score+'</div><div class="why">'+esc(b.reason)+'</div>'+
+ (comp.length?'<div class="why" style="border-color:var(--warn)">Competing: '+comp.map(x=>esc(U(x.uid).name)+' (score '+x.score+')').join(', ')+'. Higher score is advisory; you decide.</div>':'')+'</div><div class="acts">'+a.join('')+'</div></div>'}
+function vDiscover(){const u=cu(),cats=['All',...new Set(S.resources.map(r=>r.cat))],el=r=>r.requires.every(c=>u.certs.includes(c));
+ const list=S.resources.filter(r=>r.active&&(F.cat==='All'||r.cat===F.cat)&&(!F.q||(r.name+r.loc+r.cat+r.rules).toLowerCase().includes(F.q.toLowerCase()))&&(!F.el||el(r)));
+ return'<details class="g"><summary>Judge walkthrough: one full journey in about 5 minutes</summary><ol><li><b>Asha (student)</b>: in Discover, request Seminar room B2 for tomorrow. Try the oscilloscope: it is blocked until her credential is verified, so click Request verification.</li><li><b>Kiran (manager)</b>: open Bookings, verify the credential, then approve the request or reject it with a reason.</li><li><b>Asha</b>: open My bookings, check in with the starting condition, then return it marked Damaged.</li><li><b>Kiran</b>: open Incidents. The system flagged the damage, and a person resolves it with a decision.</li><li><b>Anyone</b>: Details on a booking and the Audit log show the full history. <b>Dr. Mehta (owner)</b> can list new equipment, and <b>Priya (admin)</b> sees everything.</li></ol></details>'+
+ '<div class="bar"><input value="'+esc(F.q)+'" placeholder="Search equipment, rooms, places (press Enter)" aria-label="Search" onchange="F.q=this.value;render()"><select aria-label="Category" onchange="F.cat=this.value;render()">'+cats.map(c=>'<option'+(c===F.cat?' selected':'')+'>'+c+'</option>').join('')+'</select><label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" style="width:auto"'+(F.el?' checked':'')+' onchange="F.el=this.checked;render()">Only what I can book now</label></div><h2>'+list.length+' resources</h2>'+
+ rows(list.map(r=>{const miss=r.requires.filter(c=>!u.certs.includes(c));
+  const chips=r.requires.length?r.requires.map(c=>'<span class="chip '+(u.role==='user'?(u.certs.includes(c)?'ok">✓ ':'no">✗ '):'">')+esc(c)+'</span>').join(''):'<span class="chip">No credential needed</span>';
+  const pend=c=>S.certReqs.some(x=>x.uid===u.id&&x.cert===c&&x.status==='pending');
+  return'<div class="row"><div><b>'+esc(r.name)+'</b><span class="pill" style="color:var(--mute)">'+esc(r.cat)+'</span><div class="mut">'+esc(r.loc)+' · owner '+esc(U(r.owner).name)+' · 09:00–18:00 · max '+r.maxHrs+' h · monthly cap '+r.cap+' h'+(r.deposit?' · deposit Rs '+r.deposit:'')+(r.sup?' · staff supervised':'')+'</div><div>'+chips+'</div><div class="why">'+esc(r.rules)+'</div>'+
+  (u.role==='user'?'<div class="mut" style="margin-top:4px">'+(miss.length?'You are missing: '+miss.map(c=>esc(c)+(pend(c)?' (verification pending)':' <button onclick="askCert(\''+esc(c)+'\')">Request verification</button>')).join(', '):'You are eligible. Used '+used(u.id,r.id,tday())+' of '+r.cap+' h this month.')+'</div>':'')+'</div><div class="acts">'+(u.role==='user'?'<button class="p" onclick="openReq(\''+r.id+'\')">Request booking</button>':'<span class="mut">Switch to a student to book</span>')+'</div></div>'}))}
+function vBookings(){const u=cu();let l=S.bookings.filter(b=>u.role==='admin'||b.uid===u.id||canRev(u,R(b.rid)));
+ const ord={pending:0,checked_in:1,approved:2,waitlisted:3,returned:4,rejected:5,cancelled:6};l.sort((a,b)=>ord[a.status]-ord[b.status]||b.created.localeCompare(a.created));
+ const rev=u.role==='owner'||u.role==='manager',cr=S.certReqs.filter(c=>c.status==='pending');
+ return(rev&&cr.length?'<h2>Credential checks</h2>'+cr.map(c=>'<div class="row"><div><b>'+esc(U(c.uid).name)+'</b> asks to verify <b>'+esc(c.cert)+'</b><div class="mut">'+esc(U(c.uid).dept)+'. In a real deployment a certificate file would be attached.</div></div><div class="acts"><button class="p" onclick="certAct(\''+c.id+'\',true)">Verify</button><button class="d" onclick="certAct(\''+c.id+'\',false)">Decline</button></div></div>').join(''):'')+'<h2>'+(rev?'Requests and loans on your resources':'My bookings')+'</h2>'+rows(l.map(bRow))}
+function vIncidents(){const u=cu(),l=S.incidents.filter(i=>u.role==='admin'||i.uid===u.id||canRev(u,R(i.rid)));
+ return'<h2>Incidents</h2>'+rows(l.map(i=>{const b=B(i.bid),r=R(i.rid);return'<div class="row s-'+(i.status==='open'?'pending':'approved')+'"><div><b>'+esc(i.kind)+'</b><span class="pill">'+i.status+'</span><div class="mut">'+esc(r.name)+' · '+esc(U(i.uid).name)+' · reported by '+(i.by==='sys'?'system rules':esc(U(i.by).name))+' · '+fmtT(i.t)+'</div><div class="why">'+esc(i.desc)+(i.decision?'<br>Decision: '+esc(i.decision)+'. '+esc(i.note):'')+'</div></div><div class="acts"><button onclick="details(\''+b.id+'\')">Booking</button>'+(i.status==='open'&&canRev(u,r)?'<button class="p" onclick="resolve(\''+i.id+'\')">Resolve</button>':'')+'</div></div>'}))}
+function vAudit(){const u=cu(),vis=a=>true;
+ const l=S.audit.filter(vis);return'<h2>Audit log</h2><p class="mut">Every approval, rejection, cancellation, check-in, return and incident is recorded. You see entries you are involved in.</p>'+(l.length?'<div class="row" style="display:block"><table>'+l.map(a=>'<tr><td>'+fmtT(a.t)+'</td><td>'+esc((U(a.actor)||{name:'System'}).name)+'</td><td><b>'+esc(a.action)+'</b><br>'+esc(a.detail)+'</td></tr>').join('')+'</table></div>':rows([]))}
+function vInbox(){const l=S.notes.filter(n=>n.to===me);return'<h2>Notifications</h2>'+rows(l.map(n=>'<div class="row"><div>'+esc(n.msg)+'<div class="mut">'+fmtT(n.t)+'</div></div></div>'))}
+function vListings(){const u=cu();return'<div class="acts" style="justify-content:space-between"><h2>My listings</h2><button class="p" onclick="newRes()">List a resource</button></div>'+(u.verified?'':'<div class="row s-pending"><div>Your owner profile is awaiting admin verification. You can fill in listings only after verification.</div></div>')+
+ rows(S.resources.filter(r=>r.owner===u.id).map(r=>'<div class="row"><div><b>'+esc(r.name)+'</b><span class="pill">'+(r.active?'Listed':'Paused')+'</span><div class="mut">'+esc(r.loc)+' · requires: '+(r.requires.join(', ')||'none')+' · max '+r.maxHrs+' h · cap '+r.cap+' h/month</div><div class="why">'+esc(r.rules)+'</div></div><div class="acts"><button onclick="toggleRes(\''+r.id+'\')">'+(r.active?'Pause listing':'Resume listing')+'</button></div></div>'))}
+function newRes(){if(!cu().verified)return ask('Verification needed',[{t:'note',l:'An administrator must verify your owner profile before you can list resources. Ask Priya Nair (admin).'}],()=>{},'OK');
+ ask('List a resource',[{k:'name',l:'Name'},{k:'cat',l:'Category',t:'select',o:['Fabrication','Electronics','Spaces','Media','Computing','Other']},{k:'loc',l:'Location'},{k:'req',l:'Required credentials (comma separated, blank for none)',req:0},{k:'max',l:'Max hours per booking',t:'number',v:'3'},{k:'cap',l:'Monthly cap per person (hours)',t:'number',v:'8'},{k:'dep',l:'Refundable deposit (Rs)',t:'number',v:'0'},{k:'sup',l:'Staff supervision required?',t:'select',o:['No','Yes']},{k:'rules',l:'Usage rules and conditions',t:'textarea'}],v=>run(async()=>{
+  const [r]=await T(sb.from('resources').insert({owner_id:me,name:v.name,category:v.cat,location:v.loc,requires:v.req.split(',').map(s=>s.trim()).filter(Boolean),max_hrs:Math.max(1,+v.max),monthly_cap:Math.max(1,+v.cap),deposit:+v.dep,supervised:v.sup==='Yes',rules:v.rules}).select());
+  const m=S.users.filter(x=>x.role==='manager').map(x=>({resource_id:r.id,user_id:x.id}));
+  if(m.length)await T(sb.from('resource_managers').insert(m))}),'Publish listing')}
+function vAdmin(){return'<h2>People and access</h2>'+rows(S.users.map(u=>'<div class="row"><div><b>'+esc(u.name)+'</b><span class="pill" style="color:var(--mute)">'+u.role+'</span><div class="mut">'+esc(u.dept)+' · '+(u.verified?'verified':'not verified')+(u.paused?' · privileges paused':'')+(u.certs.length?' · credentials: '+esc(u.certs.join(', ')):'')+'</div></div><div class="acts">'+(u.verified?'':'<button class="p" onclick="admin(\''+u.id+'\',\'v\')">Verify profile</button>')+(u.paused?'<button class="p" onclick="admin(\''+u.id+'\',\'r\')">Restore access</button>':'')+'</div></div>'))}
+
+/* ---- login, render, start ---- */
+const vLogin=()=>'<h2>Sign in</h2><form class="row" style="display:block;max-width:380px" onsubmit="signIn(event)"><label for="e">Email</label><input id="e" name="e" type="email" required><label for="p">Password</label><input id="p" name="p" type="password" required><div class="err" id="lerr" role="alert"></div><button class="p">Sign in</button><p class="mut">Test accounts and password are in the submission notes.</p></form>';
+async function signIn(e){e.preventDefault();const f=new FormData(e.target),{error}=await sb.auth.signInWithPassword({email:f.get('e'),password:f.get('p')});if(error)$('#lerr').textContent=error.message;else boot()}
+async function signOut(){await sb.auth.signOut();me=null;render()}
+async function boot(){const {data}=await sb.auth.getSession();if(!data.session){me=null;return render()}me=data.session.user.id;
+ try{await reload()}catch(e){alert('Could not load data: '+e.message)}
+ const u=cu();if(u){view=u.role==='user'?'discover':u.role==='admin'?'audit':'bookings';render()}}
+function render(){
+ if(!me){$('#who').innerHTML='';$('#nav').innerHTML='';$('#app').innerHTML=vLogin();return}
+ const u=cu();if(!u){$('#app').innerHTML='<div class="empty">Signed in, but no profile row exists. Check the signup trigger in the SQL file.</div>';return}
+ const unread=S.notes.filter(n=>n.to===me&&!n.read).length;
+ $('#who').innerHTML='<b>'+esc(u.name)+'</b>'+u.role+(u.verified?'':' · awaiting verification')+(u.paused?' · privileges paused':'');
+ const tabs=[['discover','Discover'],['bookings',u.role==='user'?'My bookings':'Bookings'],['incidents','Incidents'],['audit','Audit log'],['inbox','Inbox'+(unread?' ('+unread+')':'')]];
+ if(u.role==='owner')tabs.splice(1,0,['listings','My listings']);if(u.role==='admin')tabs.push(['admin','People']);
+ if(!tabs.some(t=>t[0]===view))view='discover';
+ $('#nav').innerHTML=tabs.map(t=>'<button onclick="setView(\''+t[0]+'\')"'+(t[0]===view?' aria-current="page"':'')+'>'+t[1]+'</button>').join('');
+ $('#app').innerHTML=({discover:vDiscover,bookings:vBookings,incidents:vIncidents,audit:vAudit,inbox:vInbox,listings:vListings,admin:vAdmin})[view]()}
+boot();
+</script></body></html>
